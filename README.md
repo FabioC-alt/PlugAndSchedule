@@ -27,7 +27,6 @@ scripts/cluster/              SLURM job scripts used for every run in the paper
 
 ```bash
 python reproduce.py            # tables, by-load numbers, S4 and S2 statistics, p-values, check against the paper
-python reproduce.py --latex    # also prints the LaTeX rows of the main results table
 ```
 
 The last block of the output compares every value against `expected.json` (the numbers printed in the

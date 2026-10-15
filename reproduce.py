@@ -4,9 +4,7 @@ Tables need only the Python standard library. The Wilcoxon p-values need scipy a
 (with a message) if scipy is not installed:
 
     python reproduce.py            # print the tables, check them against expected.json
-    python reproduce.py --latex    # also print the LaTeX rows of the main results table
 """
-import argparse
 import json
 from pathlib import Path
 from statistics import fmean
@@ -29,9 +27,6 @@ def mean_pct(rows, key):
 
 
 def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--latex", action="store_true")
-    args = ap.parse_args()
     got = {}  # key -> recomputed value, compared with expected.json at the end
 
     required = [f"{m}_{sp}.jsonl" for m in METHODS for sp in SPLITS if (m, sp) != ("S1", "test")]
@@ -65,14 +60,6 @@ def main():
             got.update({f"{m}.{s}.acc": acc, f"{m}.{s}.feas": fe, f"{m}.{s}.lat": lat})
             line += f"  |  {s}: n={len(rows)}  {acc:5.1f}  {fe:5.1f}  {lat:5.1f}"
         print(line)
-    if args.latex:
-        print("\n% LaTeX rows: held-out acc, feas, lat, then test acc, feas, lat")
-        for m in METHODS:
-            cells = []
-            for s in SPLITS:
-                k = f"{m}.{s}"
-                cells += [f"{got[f'{k}.{x}']:.1f}" if f"{k}.acc" in got else "TBD" for x in ("acc", "feas", "lat")]
-            print(f"{m:3s} & " + " & ".join(cells) + r" \\")
 
     # ---- by load level, held-out test
     print("\n== Held-out test by load level: accuracy % / latency s")
