@@ -34,6 +34,12 @@ def main():
     args = ap.parse_args()
     got = {}  # key -> recomputed value, compared with expected.json at the end
 
+    required = [f"{m}_{sp}.jsonl" for m in METHODS for sp in SPLITS if (m, sp) != ("S1", "test")]
+    required += ["baselines.jsonl", "S2_no_tool_held_out_test.jsonl"]
+    absent = [f for f in required if not (RES / f).exists()]
+    if absent:
+        raise SystemExit("missing files in reported_results/: " + ", ".join(absent))
+
     # ---- classical baselines: the admission rate covers the whole topology, so it is not comparable with accuracy
     base = read("baselines")
     print("== Classical baselines (admission %, latency s)")
@@ -110,17 +116,19 @@ def main():
     # ---- compare with the numbers printed in the paper
     # expected.json: key -> [value printed in the paper, tolerance]; a string such as "<1e-9" is an upper bound
     exp = json.loads((HERE / "expected.json").read_text())
-    bad = 0
+    bad = skipped = 0
     print("\n== Check against the numbers printed in the paper")
     for k, (e, tol) in exp.items():
         if k not in got:
+            skipped += 1
             print(f"  SKIP {k} (not computed in this run)")
             continue
         ok_ = got[k] < float(e[1:]) if isinstance(e, str) else abs(got[k] - e) <= tol
         if not ok_:
             bad += 1
             print(f"  FAIL {k}: paper {e}, recomputed {got[k]:.4g}")
-    print("  all listed values match" if not bad else f"  {bad} mismatch(es)")
+    note = f" ({skipped} checks skipped, install scipy to run them)" if skipped else ""
+    print((f"  all computed values match{note}" if not bad else f"  {bad} mismatch(es){note}"))
     raise SystemExit(1 if bad else 0)
 
 

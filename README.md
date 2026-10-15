@@ -32,7 +32,7 @@ python reproduce.py --latex    # also prints the LaTeX rows of the main results 
 
 The last block of the output compares every value against `expected.json` (the numbers printed in the
 paper) and exits with status 1 on a mismatch. Only the Python standard library is needed. The Wilcoxon
-p-values need `scipy` and are skipped if it is not installed (`pip install scipy`). Latencies are measured
+p-values need `scipy`; without it those checks are skipped, and the last line says how many (`pip install scipy`). Latencies are measured
 wall-clock times: they are recomputed from the shipped per-instance values, not re-measured.
 
 | Paper item | Where it comes from |
@@ -64,13 +64,16 @@ python -m tsn_bench.dataset.build_dataset --config configs/default.yaml --out da
 python dataset/verify_dataset.py data
 ```
 
-On a SLURM cluster: `sbatch scripts/cluster/submit_dataset_gen.sbatch`. The splits are a seeded random draw
+On a SLURM cluster (once: `bash scripts/cluster/setup_env.sh` to create `.venv`, and `mkdir -p slurm_logs`):
+`sbatch scripts/cluster/submit_dataset_gen.sbatch`. The splits are a seeded random draw
 (seed 42 in `configs/default.yaml`): 12 and 16 switches form `held_out_test` (720 instances), and 2 to 8
-switches are split 70/15/15 into `train`/`val`/`test` (the `test` split has 226 instances).
+switches are split by a seeded random draw with ratios 70/15/15 into `train` (989 instances), `val` (225) and
+`test` (226).
 
 ## Level 3: re-run the methods (GPU cluster)
 
-All commands run from the repository root. For B1 to B3, run `bash scripts/cluster/setup_env.sh`. The learned
+All commands run from the repository root, after `bash scripts/cluster/setup_env.sh` (creates `.venv`, used by the
+CPU jobs) and `mkdir -p slurm_logs` (the job scripts write their logs there). The learned
 methods need a GPU environment (`.venv-gpu`) with `torch`, `transformers` and `peft`
 (`pip install -r slm_future/s1_lora/requirements-gpu.txt`). Runs were measured on one NVIDIA L40S GPU. The
 defaults of each script are the settings used in the paper.
@@ -78,14 +81,28 @@ defaults of each script are the settings used in the paper.
 | Method | Command | Notes |
 |---|---|---|
 | B1, B2, B3 | `sbatch scripts/cluster/submit_baselines.sbatch` | CPU, `tsn_bench.eval.run_baselines` |
-| B4 train | `sbatch scripts/cluster/submit_b4_train.sbatch` | 250 train instances, about 8.6 h; the policy collapses after instance 183, the paper evaluates the snapshot at instance 180 |
+| B4 train | `sbatch --export=ALL,TSN_LIMIT=250 scripts/cluster/submit_b4_train.sbatch` | 250 train instances (without `TSN_LIMIT` it trains on all 989). About 8.6 h in total, so it needs several jobs of the 6 h limit: continue with `TSN_RESUME_FROM=baselines_future/b4_gcn_td3/checkpoints/b4.pt`. Snapshots are saved every 10 instances as `baselines_future/b4_gcn_td3/checkpoints/b4_instNNNN.pt` (last 8 kept). The policy collapses after instance 183, and the paper evaluates the snapshot at instance 180 (`b4_inst0180.pt`) |
 | B4 eval | `TSN_CHECKPOINT=<snapshot> TSN_SPLIT=held_out_test sbatch --export=ALL scripts/cluster/submit_b4_eval.sbatch` | |
 | S1 train | `sbatch --export=ALL,TSN_RUN_NAME=full_scale_3ep scripts/cluster/submit_s1_train.sbatch` | Qwen2.5-3B-Instruct, LoRA r=16, 3 epochs, about 27 min |
 | S1 eval | `TSN_RUN_NAME=full_scale_3ep TSN_SPLIT=held_out_test sbatch --export=ALL scripts/cluster/submit_s1_eval.sbatch` | max 4096 new tokens |
-| S2 | `TSN_SPLIT=held_out_test sbatch --export=ALL scripts/cluster/submit_s2_eval.sbatch` | max 3072 new tokens, 3 tool rounds; no-tool control: `TSN_NO_TOOL=1` |
-| S2b | `TSN_SPLIT=held_out_test sbatch --export=ALL scripts/cluster/submit_s2b_eval.sbatch` | Qwen3.5-4B, needs the third-party scorer below |
+| S2 | `TSN_SPLIT=held_out_test sbatch --export=ALL scripts/cluster/submit_s2_eval.sbatch` | max 3072 new tokens, 3 tool rounds. No-tool control: add `TSN_NO_TOOL=1,TSN_OUT=results/s2_eval_held_out_test_no_tool.jsonl` to `--export` (without `TSN_OUT` it overwrites the normal S2 log) |
+| S2b | `sbatch --export=ALL,OPENNOD_VENV=<path>/.venv,TSN_SPLIT=held_out_test scripts/cluster/submit_s2b_eval.sbatch` | Qwen3.5-4B. `OPENNOD_VENV` is required: a separate virtual environment that contains the third-party scorer (see below) and this repository's dependencies; the script puts the repository on `PYTHONPATH` |
 | S3 | `TSN_SPLIT=held_out_test sbatch --export=ALL scripts/cluster/submit_s3_eval.sbatch` | |
 | S4 | `TSN_SPLIT=held_out_test sbatch --export=ALL scripts/cluster/submit_s4_eval.sbatch` | max 4 tool rounds |
+
+The default output of each script is `results/<method>_eval_<split>.jsonl`. To rebuild `reported_results/`,
+`tools/build_slim_results.py` expects these raw files in `results/` (give the runs these names with `TSN_OUT`,
+or rename them):
+
+```
+baselines.jsonl
+s1_eval_held_out_test_full_scale_3ep.jsonl   s1_eval_test.jsonl   s1_eval_test_near_saturation_retest.jsonl   s1_eval_test_medium_retest.jsonl
+s2_eval_held_out_test.jsonl   s2_eval_held_out_test_near_saturation_retest.jsonl   s2_eval_held_out_test_no_tool.jsonl
+s2_eval_test.jsonl   s2_eval_test_near_saturation_retest.jsonl
+s2b_eval_held_out_test_full.jsonl   s2b_eval_test_full.jsonl
+s3_eval_held_out_test.jsonl   s3_eval_test.jsonl   s4_eval_held_out_test.jsonl   s4_eval_test.jsonl
+b4_eval_held_out_test.jsonl   b4_eval_test.jsonl
+```
 
 Use `TSN_SPLIT=test` for the 226 in-distribution instances and `TSN_LOAD_FACTOR=<low|medium|near_saturation>`
 to run one load level. The job scripts write their raw logs to `results/` (not shipped). After a re-run,
@@ -94,7 +111,10 @@ to run one load level. The job scripts write their raw logs to `results/` (not s
 Third-party code for S2b: the typed-logits scorer `semif_phase1` from SemIf-OpenJev
 (`https://github.com/TheoLeeCJ/SemIf-OpenJev`, previously named OpenNod; the repository was renamed and some
 files in this repository still use the old name). The commit used for the reported runs is
-`ca3ba65f142967030ecb453346e94d6f476a69df`. Put the checkout on `PYTHONPATH`.
+`ca3ba65f142967030ecb453346e94d6f476a69df`. Check it out next to this repository, create a virtual environment
+there with its requirements, add this repository's `requirements.txt`, and point `OPENNOD_VENV` at it. It uses
+different versions of `torch` and `transformers` than the other GPU jobs, which is why S2b does not run in
+`.venv-gpu`.
 
 ## Merge rules applied to the raw logs
 
@@ -122,5 +142,8 @@ rows were replaced by re-runs with the corrected budget, and the replacement is 
   in our runs (it admits every new flow in all 2160 instances). The fingerprint check was written against
   the dataset used for the paper, and has not yet been confirmed by a full regeneration.
 * All results are from one run per instance (greedy decoding, no repeated seeds for the models).
-* Some code comments refer to an internal development log (`PROGRESS.md`, `MILESTONES.md`, `TEST_PLAN.md`)
-  that is not part of this package.
+* Some code comments and script headers refer to files that are not part of this package: an internal
+  development log (`PROGRESS.md`, `MILESTONES.md`, `TEST_PLAN.md`) and per-directory READMEs under
+  `slm_future/`. The commands above replace the setup instructions those READMEs contained.
+* The code and job scripts still use the old name "OpenNod" for the S2b library (`slm_future/s2b_opennod`,
+  `OPENNOD_VENV`).

@@ -4,6 +4,7 @@ The fingerprint of an instance covers what the seeded generators produce (topolo
 flows, new nodes), not the solver outputs (CP-SAT schedules can differ between machines and threads).
 
     python dataset/verify_dataset.py <data-dir>             # compare with fingerprints.jsonl
+    python dataset/verify_dataset.py <data-dir> --verbose   # list every differing or missing instance
     python dataset/verify_dataset.py <data-dir> --write     # (maintainers) write fingerprints.jsonl
 """
 import hashlib
@@ -38,6 +39,12 @@ def main():
     extra = sorted(set(fp) - set(ref))
     print(f"{len(ref) - len(missing) - len(changed)} of {len(ref)} instances match; "
           f"{len(missing)} missing, {len(changed)} different, {len(extra)} not in the reference")
+    for label, ids in (("different", changed), ("missing", missing), ("not in the reference", extra)):
+        shown = ids if "--verbose" in sys.argv else ids[:10]
+        for i in shown:
+            print(f"  {label}: {i}")
+        if len(ids) > len(shown):
+            print(f"  ... {len(ids) - len(shown)} more {label} (use --verbose to list all)")
     sys.exit(1 if missing or changed else 0)
 
 

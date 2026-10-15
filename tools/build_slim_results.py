@@ -16,9 +16,11 @@ OUT = Path("reported_results")
 LOADS = ("low", "medium", "near_saturation")
 
 
-def read(name):
+def read(name, required=True):
     p = RAW / f"{name}.jsonl"
     if not p.exists():
+        if required:
+            raise SystemExit(f"missing raw log {p} (see the README for the expected file names)")
         return None
     return [json.loads(l) for l in p.open(encoding="utf-8") if l.strip()]
 
@@ -59,7 +61,7 @@ def main():
     # S1: held-out run used max-new-tokens 4096. The test-split run of 2026-09-16 used 1024 and
     # truncated the medium and near-saturation answers, so those rows are replaced by re-runs.
     write("S1_held_out_test", slim(read("s1_eval_held_out_test_full_scale_3ep"), "generation_time_s"), 720)
-    near, med = read("s1_eval_test_near_saturation_retest"), read("s1_eval_test_medium_retest")
+    near, med = read("s1_eval_test_near_saturation_retest", False), read("s1_eval_test_medium_retest", False)
     if near and med:
         write("S1_test", slim(merge(read("s1_eval_test"), near, med), "generation_time_s"), 226)
     else:
