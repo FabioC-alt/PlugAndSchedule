@@ -86,6 +86,28 @@ def main():
     got["S2.no_tool.usable"] = usable
     print(f"== S2 without the tool: {usable} of {len(nt)} held-out instances gave a usable answer")
 
+    # ---- training facts quoted in the paper, from the shipped training logs
+    tl = HERE / "training_logs"
+    b4 = [json.loads(l) for l in (tl / "B4_train_log.jsonl").read_text(encoding="utf-8").splitlines() if l.strip()]
+    blocks = []  # instance ids in order of appearance
+    for r in b4:
+        if not blocks or blocks[-1] != r["instance_id"]:
+            blocks.append(r["instance_id"])
+    first_epoch = {}
+    for r in b4:
+        first_epoch.setdefault(r["instance_id"], r["epoch"])
+    got.update({"B4.train.epochs": len(b4), "B4.train.hours": b4[-1]["elapsed_s"] / 3600, "B4.train.instances": len(blocks),
+                "B4.train.epoch_inst180": first_epoch[blocks[179]], "B4.train.epoch_inst183": first_epoch[blocks[182]]})
+    print(f"{chr(10)}== B4 training log: {len(b4)} epochs, {got['B4.train.hours']:.2f} h, {len(blocks)} instances; "
+          f"instance 180 is epoch {got['B4.train.epoch_inst180']}, instance 183 is epoch {got['B4.train.epoch_inst183']}")
+    s1 = json.loads((tl / "S1_training_log.json").read_text(encoding="utf-8"))
+    val = [r["eval_loss"] for r in s1["log_history"] if "eval_loss" in r]
+    run = next(r["train_runtime"] for r in s1["log_history"] if "train_runtime" in r)
+    got.update({f"S1.train.val_loss_ep{i + 1}": v for i, v in enumerate(val)})
+    got["S1.train.minutes"] = run / 60
+    print(f"== S1 training log: validation loss per epoch {[round(v, 3) for v in val]}, training time {run / 60:.1f} min "
+          f"({s1['n_train_examples']} train / {s1['n_val_examples']} validation examples)")
+
     # ---- paired Wilcoxon signed-rank tests on per-instance accuracy, held-out test (needs scipy)
     try:
         from scipy.stats import wilcoxon

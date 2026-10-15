@@ -14,6 +14,7 @@ scored against the schedule of a full ILP solver on 2160 generated instances.
 reproduce.py                  Level 1: recompute every number of the Results section, compare with the paper
 expected.json                 the values as printed in the paper, with tolerances
 reported_results/             per-instance results of all methods (slim: no generated text)
+training_logs/               training logs of B4 (3567 epochs) and S1 (loss per epoch, training time)
 dataset/                      Level 2: manifest and fingerprints of the 2160 instances + verifier
 tools/build_slim_results.py   how reported_results/ was derived from the raw cluster logs (merge rules in one place)
 tsn_bench/                    dataset generator, solvers B1 to B3, evaluation tools
@@ -43,6 +44,7 @@ wall-clock times: they are recomputed from the shipped per-instance values, not 
 | S4 failure rate, 92.7% accuracy when it calls the solver | `reported_results/S4_held_out_test.jsonl`, field `used_tool` |
 | S2 without the tool: 0 of 720 usable | `reported_results/S2_no_tool_held_out_test.jsonl` |
 | Wilcoxon p-values | paired, per-instance accuracy, held-out split |
+| Training facts (B4 epochs, hours, instance 180 and 183; S1 validation losses and training time) | `training_logs/` |
 
 Per-instance fields: `accuracy` (decision match with the ILP ground truth over the new flows), `feasibility`
 (valid flows over admitted flows, empty when nothing was admitted), `latency_s` (wall-clock seconds per
@@ -82,7 +84,7 @@ defaults of each script are the settings used in the paper.
 | B1, B2, B3 | `sbatch scripts/cluster/submit_baselines.sbatch` | CPU, `tsn_bench.eval.run_baselines` |
 | B4 train | `sbatch --export=ALL,TSN_LIMIT=250 scripts/cluster/submit_b4_train.sbatch` | 250 train instances (without `TSN_LIMIT` it trains on all 989). About 8.6 h in total, so it needs several jobs of the 6 h limit: continue with `TSN_RESUME_FROM=baselines_future/b4_gcn_td3/checkpoints/b4.pt`. Snapshots are saved every 10 instances as `baselines_future/b4_gcn_td3/checkpoints/b4_instNNNN.pt` (last 8 kept). The policy collapses after instance 183, and the paper evaluates the snapshot at instance 180 (`b4_inst0180.pt`) |
 | B4 eval | `TSN_CHECKPOINT=<snapshot> TSN_SPLIT=held_out_test sbatch --export=ALL scripts/cluster/submit_b4_eval.sbatch` | |
-| S1 train | `sbatch --export=ALL,TSN_RUN_NAME=full_scale_3ep scripts/cluster/submit_s1_train.sbatch` | Qwen2.5-3B-Instruct, LoRA r=16, 3 epochs, about 27 min |
+| S1 train | `sbatch --export=ALL,TSN_RUN_NAME=full_scale_3ep scripts/cluster/submit_s1_train.sbatch` | Qwen2.5-3B-Instruct, LoRA r=16, 3 epochs; the log shows 21 min of training, about 27 min for the whole job (loading, validation, saving) |
 | S1 eval | `TSN_RUN_NAME=full_scale_3ep TSN_SPLIT=held_out_test sbatch --export=ALL scripts/cluster/submit_s1_eval.sbatch` | max 4096 new tokens |
 | S2 | `TSN_SPLIT=held_out_test sbatch --export=ALL scripts/cluster/submit_s2_eval.sbatch` | max 3072 new tokens, 3 tool rounds. No-tool control: add `TSN_NO_TOOL=1,TSN_OUT=results/s2_eval_held_out_test_no_tool.jsonl` to `--export` (without `TSN_OUT` it overwrites the normal S2 log) |
 | S2b | `sbatch --export=ALL,OPENNOD_VENV=<path>/.venv,TSN_SPLIT=held_out_test scripts/cluster/submit_s2b_eval.sbatch` | Qwen3.5-4B. `OPENNOD_VENV` is required: a separate virtual environment that contains the third-party scorer (see below) and this repository's dependencies; the script puts the repository on `PYTHONPATH` |

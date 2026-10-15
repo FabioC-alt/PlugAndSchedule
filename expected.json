@@ -374,5 +374,37 @@
 "S1.test.lat": [
 40.2,
 0.051
+],
+"B4.train.epochs": [
+3567,
+0
+],
+"B4.train.hours": [
+8.6,
+0.051
+],
+"B4.train.instances": [
+250,
+0
+],
+"B4.train.epoch_inst180": [
+2621,
+0
+],
+"B4.train.epoch_inst183": [
+2624,
+0
+],
+"S1.train.val_loss_ep1": [
+0.16,
+0.0006
+],
+"S1.train.val_loss_ep2": [
+0.154,
+0.0006
+],
+"S1.train.val_loss_ep3": [
+0.152,
+0.0006
 ]
 }
