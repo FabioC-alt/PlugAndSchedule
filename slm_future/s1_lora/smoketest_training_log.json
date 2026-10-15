@@ -1,0 +1,80 @@
+{
+  "model_name": "Qwen/Qwen2.5-3B-Instruct",
+  "lora_config": {
+    "r": 16,
+    "alpha": 32,
+    "dropout": 0.05,
+    "target_modules": [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj",
+      "gate_proj",
+      "up_proj",
+      "down_proj"
+    ]
+  },
+  "log_history": [
+    {
+      "loss": 0.26899383068084715,
+      "grad_norm": 0.1845734864473343,
+      "learning_rate": 0.0001709677419354839,
+      "epoch": 0.16161616161616163,
+      "step": 10
+    },
+    {
+      "loss": 0.17671332359313965,
+      "grad_norm": 0.17014633119106293,
+      "learning_rate": 0.00013870967741935487,
+      "epoch": 0.32323232323232326,
+      "step": 20
+    },
+    {
+      "loss": 0.15454286336898804,
+      "grad_norm": 0.7159741520881653,
+      "learning_rate": 0.0001064516129032258,
+      "epoch": 0.48484848484848486,
+      "step": 30
+    },
+    {
+      "loss": 0.1767913818359375,
+      "grad_norm": 0.10879988968372345,
+      "learning_rate": 7.419354838709677e-05,
+      "epoch": 0.6464646464646465,
+      "step": 40
+    },
+    {
+      "loss": 0.1678612232208252,
+      "grad_norm": 0.2590944170951843,
+      "learning_rate": 4.1935483870967746e-05,
+      "epoch": 0.8080808080808081,
+      "step": 50
+    },
+    {
+      "loss": 0.15778783559799195,
+      "grad_norm": 0.09929115325212479,
+      "learning_rate": 9.67741935483871e-06,
+      "epoch": 0.9696969696969697,
+      "step": 60
+    },
+    {
+      "eval_loss": 0.16271337866783142,
+      "eval_runtime": 42.3705,
+      "eval_samples_per_second": 5.31,
+      "eval_steps_per_second": 0.684,
+      "epoch": 1.0,
+      "step": 62
+    },
+    {
+      "train_runtime": 429.7743,
+      "train_samples_per_second": 2.301,
+      "train_steps_per_second": 0.144,
+      "total_flos": 3.4081603035119616e+16,
+      "train_loss": 0.1834119716959615,
+      "epoch": 1.0,
+      "step": 62
+    }
+  ],
+  "n_train_examples": 989,
+  "n_val_examples": 225
+}

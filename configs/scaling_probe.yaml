@@ -1,0 +1,62 @@
+# Scaling probe config (Stage 1 of the scaling/execution-time investigation,
+# see TEST_PLAN.md / PROGRESS.md). NOT the main dataset -- a separate, smaller
+# dataset used only to find whether classical ILP (B1/B2) shows real scaling
+# stress. Feeds tsn_bench.eval.run_baselines directly (B1/B2/B3 only, no
+# GPU/SLM involved in this stage).
+#
+# Calibration finding (local, before committing cluster time): switch_count
+# alone barely matters -- the main dataset's load factors are defined
+# relative to ONE link's capacity, so total flow count stays roughly flat as
+# switch_count grows (128 switches still only produced ~355 flows, same
+# ballpark as 32 switches). The real ILP-stress lever is flow COUNT, which
+# only grows if load_factor is pushed well past 1.0 -- confirmed locally:
+# load_factor 0.85->8.0 took solve time from 0.3s to 8s (359->2000 flows,
+# the old generator's flow-count cap). So this probe fixes switch_count at
+# 16 (the main dataset's largest standard size, for comparability) and
+# sweeps load_factor as the sole controlled variable, with the generator's
+# attempt cap raised well past 2000 so higher load factors aren't
+# artificially capped.
+#
+# Usage:
+#   python -m tsn_bench.dataset.build_dataset --config configs/scaling_probe.yaml --out data_scaling --time-limit-s 30
+#   python -m tsn_bench.eval.run_baselines --data data_scaling --out results/scaling_probe.jsonl --time-limit-s 30
+
+seed: 4242
+
+topology:
+  in_distribution_switch_counts: [16]   # fixed -- switch_count isn't the stress lever, see note above
+  held_out_switch_counts: []            # not relevant for this probe -- no SLM eval here
+  talkers_per_switch: [1, 3]
+  listeners_per_switch: [1, 3]
+  link_rate_mbps: 1000
+  instances_per_size: 5
+
+flows:
+  tt_profiles:
+    - { size_bytes: 50, period_us: 250, deadline_us: 1000 }
+    - { size_bytes: 100, period_us: 500, deadline_us: 1000 }
+    - { size_bytes: 500, period_us: 1000, deadline_us: 1000 }
+  avb_profile:
+    size_bytes_range: [1000, 1200]
+    period_us: 4000
+    deadline_us: 2000
+  avb_fraction: 0.25
+  max_attempts: 20000                   # see tsn_bench/flows/generator.py -- default 2000 caps flow count too early
+  load_factors:                         # the actual controlled variable for this probe
+    near_saturation: 0.85               # continuity point with the main dataset
+    stress_2x: 2.0
+    stress_4x: 4.0
+    stress_8x: 8.0
+    stress_16x: 16.0
+    stress_32x: 32.0
+
+node_addition:
+  scenarios: [single]                   # drop batch -- not relevant to this probe, keeps instance count down
+  batch_size_range: [2, 4]
+
+splits:
+  train: 1.0                            # irrelevant for this probe (no held-out sizes, no SLM eval)
+  val: 0.0
+  test: 0.0
+
+seeds_per_config: 2

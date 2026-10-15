@@ -1,0 +1,366 @@
+{
+"B1.test.adm": [
+100.0,
+0.006
+],
+"B1.test.lat": [
+0.128,
+0.0006
+],
+"B1.held_out_test.adm": [
+100.0,
+0.006
+],
+"B1.held_out_test.lat": [
+0.179,
+0.0006
+],
+"B2.test.adm": [
+100.0,
+0.006
+],
+"B2.test.lat": [
+0.123,
+0.0006
+],
+"B2.held_out_test.adm": [
+99.93,
+0.006
+],
+"B2.held_out_test.lat": [
+0.158,
+0.0006
+],
+"B3.test.adm": [
+99.97,
+0.006
+],
+"B3.test.lat": [
+0.029,
+0.0006
+],
+"B3.held_out_test.adm": [
+99.98,
+0.006
+],
+"B3.held_out_test.lat": [
+0.069,
+0.0006
+],
+"S2b.held_out_test.acc": [
+99.8,
+0.051
+],
+"S2b.held_out_test.feas": [
+100.0,
+0.051
+],
+"S2b.held_out_test.lat": [
+2.0,
+0.051
+],
+"S2b.test.acc": [
+100.0,
+0.051
+],
+"S2b.test.feas": [
+100.0,
+0.051
+],
+"S2b.test.lat": [
+1.8,
+0.051
+],
+"S3.held_out_test.acc": [
+95.4,
+0.051
+],
+"S3.held_out_test.feas": [
+100.0,
+0.051
+],
+"S3.held_out_test.lat": [
+22.8,
+0.051
+],
+"S3.test.acc": [
+98.0,
+0.051
+],
+"S3.test.feas": [
+100.0,
+0.051
+],
+"S3.test.lat": [
+23.3,
+0.051
+],
+"S2.held_out_test.acc": [
+95.0,
+0.051
+],
+"S2.held_out_test.feas": [
+100.0,
+0.051
+],
+"S2.held_out_test.lat": [
+19.2,
+0.051
+],
+"S2.test.acc": [
+98.3,
+0.051
+],
+"S2.test.feas": [
+100.0,
+0.051
+],
+"S2.test.lat": [
+18.9,
+0.051
+],
+"S4.held_out_test.acc": [
+87.9,
+0.051
+],
+"S4.held_out_test.feas": [
+100.0,
+0.051
+],
+"S4.held_out_test.lat": [
+31.1,
+0.051
+],
+"S4.test.acc": [
+93.3,
+0.051
+],
+"S4.test.feas": [
+100.0,
+0.051
+],
+"S4.test.lat": [
+35.4,
+0.051
+],
+"B4.held_out_test.acc": [
+31.3,
+0.051
+],
+"B4.held_out_test.feas": [
+100.0,
+0.051
+],
+"B4.held_out_test.lat": [
+1.2,
+0.051
+],
+"B4.test.acc": [
+20.4,
+0.051
+],
+"B4.test.feas": [
+100.0,
+0.051
+],
+"B4.test.lat": [
+1.6,
+0.051
+],
+"S1.held_out_test.acc": [
+99.7,
+0.051
+],
+"S1.held_out_test.feas": [
+34.8,
+0.051
+],
+"S1.held_out_test.lat": [
+40.1,
+0.051
+],
+"S1.load.low.acc": [
+100.0,
+0.051
+],
+"S1.load.low.lat": [
+15.6,
+0.051
+],
+"S1.load.medium.acc": [
+99.9,
+0.051
+],
+"S1.load.medium.lat": [
+38.8,
+0.051
+],
+"S1.load.near_saturation.acc": [
+99.3,
+0.051
+],
+"S1.load.near_saturation.lat": [
+66.0,
+0.051
+],
+"S2.load.low.acc": [
+99.1,
+0.051
+],
+"S2.load.low.lat": [
+9.3,
+0.051
+],
+"S2.load.medium.acc": [
+97.1,
+0.051
+],
+"S2.load.medium.lat": [
+12.3,
+0.051
+],
+"S2.load.near_saturation.acc": [
+88.7,
+0.051
+],
+"S2.load.near_saturation.lat": [
+36.0,
+0.051
+],
+"S2b.load.low.acc": [
+100.0,
+0.051
+],
+"S2b.load.low.lat": [
+0.8,
+0.051
+],
+"S2b.load.medium.acc": [
+99.4,
+0.051
+],
+"S2b.load.medium.lat": [
+2.0,
+0.051
+],
+"S2b.load.near_saturation.acc": [
+100.0,
+0.051
+],
+"S2b.load.near_saturation.lat": [
+3.3,
+0.051
+],
+"S3.load.low.acc": [
+99.3,
+0.051
+],
+"S3.load.low.lat": [
+9.8,
+0.051
+],
+"S3.load.medium.acc": [
+96.4,
+0.051
+],
+"S3.load.medium.lat": [
+22.4,
+0.051
+],
+"S3.load.near_saturation.acc": [
+90.4,
+0.051
+],
+"S3.load.near_saturation.lat": [
+36.4,
+0.051
+],
+"S4.load.low.acc": [
+97.9,
+0.051
+],
+"S4.load.low.lat": [
+17.9,
+0.051
+],
+"S4.load.medium.acc": [
+93.6,
+0.051
+],
+"S4.load.medium.lat": [
+36.2,
+0.051
+],
+"S4.load.near_saturation.acc": [
+72.3,
+0.051
+],
+"S4.load.near_saturation.lat": [
+39.3,
+0.051
+],
+"B4.load.low.acc": [
+54.9,
+0.051
+],
+"B4.load.low.lat": [
+0.4,
+0.051
+],
+"B4.load.medium.acc": [
+25.1,
+0.051
+],
+"B4.load.medium.lat": [
+1.1,
+0.051
+],
+"B4.load.near_saturation.acc": [
+13.9,
+0.051
+],
+"B4.load.near_saturation.lat": [
+2.1,
+0.051
+],
+"p.S2b.S2": [
+"<1e-40",
+0
+],
+"p.S2b.S3": [
+"<1e-40",
+0
+],
+"p.S2b.S4": [
+"<1e-40",
+0
+],
+"p.S2b.S1": [
+0.00025,
+1e-05
+],
+"p.S2.S3": [
+0.245,
+0.001
+],
+"p.S2.S4": [
+"<1e-9",
+0
+],
+"p.S3.S4": [
+"<1e-9",
+0
+],
+"S4.ns.no_solver_call_pct": [
+22.1,
+0.051
+],
+"S4.ns.acc_when_solver_called": [
+92.7,
+0.051
+],
+"S2.no_tool.usable": [
+0,
+0
+]
+}

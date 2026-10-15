@@ -1,0 +1,9 @@
+# GPU-only deps for S1 LoRA fine-tuning, kept separate from the top-level
+# requirements.txt so the CPU-only foundation venv (dataset gen, B1-B3,
+# web UI) stays light. Install torch first with the CUDA index matching the
+# cluster's driver (disi's l40s nodes: driver 580.95, CUDA 13.0 — see
+# scripts/cluster/submit_s1_train.sbatch for the exact install command).
+transformers>=4.46
+peft>=0.13
+accelerate>=1.0
+datasets>=3.0
