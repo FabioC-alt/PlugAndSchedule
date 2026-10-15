@@ -29,7 +29,7 @@ def mean_pct(rows, key):
 def main():
     got = {}  # key -> recomputed value, compared with expected.json at the end
 
-    required = [f"{m}_{sp}.jsonl" for m in METHODS for sp in SPLITS if (m, sp) != ("S1", "test")]
+    required = [f"{m}_{sp}.jsonl" for m in METHODS for sp in SPLITS]
     required += ["baselines.jsonl", "S2_no_tool_held_out_test.jsonl"]
     absent = [f for f in required if not (RES / f).exists()]
     if absent:

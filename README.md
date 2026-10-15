@@ -124,13 +124,13 @@ rows were replaced by re-runs with the corrected budget, and the replacement is 
 * S2, both splits: the near-saturation instances come from the re-run with 3072 new tokens (the first runs
   used 512).
 * S1, `test` split: the first run (1024 new tokens) truncated medium and near-saturation answers, so those
-  rows are replaced by re-runs with 4096 new tokens. S1 on `held_out_test` was run once with 4096 tokens.
+  rows are replaced by re-runs with 4096 new tokens (`s1_eval_test_near_saturation_retest`, `s1_eval_test_medium_retest`).
+* S1, `held_out_test`: the full run `s1_eval_held_out_test_full_scale_3ep` with 4096 new tokens. A separate re-run of
+  its near-saturation instances (`s1_eval_held_out_test_near_saturation_retest`, 98.99% accuracy against 99.26% in
+  the full run on those instances) exists in the raw logs and is not used.
 
 ## Known gaps
 
-* **S1 on the `test` split is not shipped yet.** The medium-load re-run has not finished, and
-  `build_slim_results.py` refuses to write `S1_test.jsonl` until it has all re-runs. `reproduce.py`
-  reports this instead of printing stale values.
 * **The "before the fix" figures for S4** (accuracy 74.8%, and 65.0% of near-saturation runs without a solver
   call, on the held-out split) come from an earlier full run that was overwritten. They cannot be recomputed
   from the shipped files. The "after" figures (87.9% and 22.1%) can.
