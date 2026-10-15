@@ -12,7 +12,7 @@ from pathlib import Path
 from statistics import fmean
 
 HERE = Path(__file__).parent
-RES = HERE / "results"
+RES = HERE / "reported_results"
 SPLITS = ("held_out_test", "test")
 METHODS = ["S2b", "S1", "S3", "S2", "S4", "B4"]
 LOADS = ["low", "medium", "near_saturation"]

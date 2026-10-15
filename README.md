@@ -1,4 +1,4 @@
-# Plug and Schedule: reviewer package
+# Plug and Schedule: reviewer instructions
 
 Code and results to check the paper *Plug and Schedule: Can Language Models Admit New Machines into
 Time-Sensitive Networks?*. There are three levels, from a few seconds to a cluster re-run. Level 1 needs no
@@ -11,12 +11,11 @@ with a solver tool, S2b yes/no scoring per flow, S3 narrowed prompt, S4 optional
 scored against the schedule of a full ILP solver on 2160 generated instances.
 
 ```
-reviewer-package/
-  reproduce.py                Level 1: recompute every number of the Results section, compare with the paper
-  expected.json               the values as printed in the paper, with tolerances
-  results/                    per-instance results of all methods (slim: no generated text)
-  dataset/                    Level 2: manifest and fingerprints of the 2160 instances + verifier
-  tools/build_slim_results.py how results/ was derived from the raw cluster logs (merge rules in one place)
+reproduce.py                  Level 1: recompute every number of the Results section, compare with the paper
+expected.json                 the values as printed in the paper, with tolerances
+reported_results/             per-instance results of all methods (slim: no generated text)
+dataset/                      Level 2: manifest and fingerprints of the 2160 instances + verifier
+tools/build_slim_results.py   how reported_results/ was derived from the raw cluster logs (merge rules in one place)
 tsn_bench/                    dataset generator, solvers B1 to B3, evaluation tools
 baselines_future/b4_gcn_td3/  B4
 slm_future/                   S1 to S4 (directory names are historical: s2b_opennod holds S2b)
@@ -27,8 +26,8 @@ scripts/cluster/              SLURM job scripts used for every run in the paper
 ## Level 1: recompute the tables and figures (seconds)
 
 ```bash
-python reviewer-package/reproduce.py            # tables, by-load numbers, S4 and S2 statistics, p-values, check against the paper
-python reviewer-package/reproduce.py --latex    # also prints the LaTeX rows of the main results table
+python reproduce.py            # tables, by-load numbers, S4 and S2 statistics, p-values, check against the paper
+python reproduce.py --latex    # also prints the LaTeX rows of the main results table
 ```
 
 The last block of the output compares every value against `expected.json` (the numbers printed in the
@@ -38,12 +37,12 @@ wall-clock times: they are recomputed from the shipped per-instance values, not 
 
 | Paper item | Where it comes from |
 |---|---|
-| Table of classical baselines | `results/baselines.jsonl`, whole-topology admission rate (not comparable with accuracy) |
-| Main results table (accuracy, feasibility, latency) | `results/<method>_<split>.jsonl` |
+| Table of classical baselines | `reported_results/baselines.jsonl`, whole-topology admission rate (not comparable with accuracy) |
+| Main results table (accuracy, feasibility, latency) | `reported_results/<method>_<split>.jsonl` |
 | Figure: accuracy against latency | held-out rows of the main results table |
 | Figure: results by load level | `reproduce.py`, section "by load level" (same files, grouped by `load`) |
-| S4 failure rate, 92.7% accuracy when it calls the solver | `results/S4_held_out_test.jsonl`, field `used_tool` |
-| S2 without the tool: 0 of 720 usable | `results/S2_no_tool_held_out_test.jsonl` |
+| S4 failure rate, 92.7% accuracy when it calls the solver | `reported_results/S4_held_out_test.jsonl`, field `used_tool` |
+| S2 without the tool: 0 of 720 usable | `reported_results/S2_no_tool_held_out_test.jsonl` |
 | Wilcoxon p-values | paired, per-instance accuracy, held-out split |
 
 Per-instance fields: `accuracy` (decision match with the ILP ground truth over the new flows), `feasibility`
@@ -52,8 +51,8 @@ instance), `load`, `switch_count`, `n_flows`, `used_tool` (solver tool called at
 
 ## Level 2: dataset (verify, or regenerate)
 
-`reviewer-package/dataset/manifest.jsonl` lists the 2160 instances (seed, scenario, load, number of base and
-new flows). `reviewer-package/dataset/fingerprints.jsonl` holds a SHA-256 of what the seeded generators
+`dataset/manifest.jsonl` lists the 2160 instances (seed, scenario, load, number of base and
+new flows). `dataset/fingerprints.jsonl` holds a SHA-256 of what the seeded generators
 produce for each instance (topology, base flows, new flows, new nodes). Solver outputs are excluded because
 CP-SAT schedules can differ between machines.
 
@@ -62,7 +61,7 @@ pip install -r requirements.txt
 # regenerate (CPU only; about 2160 CP-SAT solves of up to 30 s each, run it on a cluster)
 python -m tsn_bench.dataset.build_dataset --config configs/default.yaml --out data --time-limit-s 30
 # then compare with the shipped fingerprints
-python reviewer-package/dataset/verify_dataset.py data
+python dataset/verify_dataset.py data
 ```
 
 On a SLURM cluster: `sbatch scripts/cluster/submit_dataset_gen.sbatch`. The splits are a seeded random draw
@@ -89,8 +88,8 @@ defaults of each script are the settings used in the paper.
 | S4 | `TSN_SPLIT=held_out_test sbatch --export=ALL scripts/cluster/submit_s4_eval.sbatch` | max 4 tool rounds |
 
 Use `TSN_SPLIT=test` for the 226 in-distribution instances and `TSN_LOAD_FACTOR=<low|medium|near_saturation>`
-to run one load level. After a re-run, `reviewer-package/tools/build_slim_results.py` rebuilds
-`reviewer-package/results/` from the raw `results/*.jsonl` (it asserts the expected number of rows per file).
+to run one load level. The job scripts write their raw logs to `results/` (not shipped). After a re-run,
+`python tools/build_slim_results.py` rebuilds `reported_results/` from them (it asserts the expected number of rows per file).
 
 Third-party code for S2b: the typed-logits scorer `semif_phase1` from SemIf-OpenJev
 (`https://github.com/TheoLeeCJ/SemIf-OpenJev`, previously named OpenNod; the repository was renamed and some
@@ -101,7 +100,7 @@ files in this repository still use the old name). The commit used for the report
 
 Two early runs generated too few tokens and truncated their answers on large instances. Their affected
 rows were replaced by re-runs with the corrected budget, and the replacement is done in
-`reviewer-package/tools/build_slim_results.py`:
+`tools/build_slim_results.py`:
 
 * S2, both splits: the near-saturation instances come from the re-run with 3072 new tokens (the first runs
   used 512).

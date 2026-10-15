@@ -1,1 +1,0 @@
-scipy>=1.12   # optional: only for the Wilcoxon p-values; the tables use the standard library only

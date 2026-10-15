@@ -1,18 +1,18 @@
 """Maintainer tool: turn the raw cluster logs in <repo>/results/ into the slim,
-per-instance files shipped in reviewer-package/results/.
+per-instance files shipped in reported_results/.
 
 Raw logs carry the model's full generated text (megabytes). The slim files keep
 only what the paper's numbers need. Re-runs that replace truncated generations
 are merged here, explicitly, so the merge rule is visible in one place.
 
-Usage (from the repo root):  python reviewer-package/tools/build_slim_results.py
+Usage (from the repo root):  python tools/build_slim_results.py
 """
 import json
 import sys
 from pathlib import Path
 
 RAW = Path("results")
-OUT = Path("reviewer-package/results")
+OUT = Path("reported_results")
 LOADS = ("low", "medium", "near_saturation")
 
 
