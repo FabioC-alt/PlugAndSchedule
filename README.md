@@ -1,4 +1,4 @@
-# Plug and Schedul
+# Plug and Schedule
 
 Code and results to check the paper *Plug and Schedule: Can Language Models Admit New Machines into
 Time-Sensitive Networks?*. There are three levels, from a few seconds to a cluster re-run. Level 1 needs no
